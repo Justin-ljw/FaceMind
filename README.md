@@ -1,2 +1,14 @@
 # FaceMind
 FaceMind：基于OpenCV + RetinaFace + ArcFace的实时人脸识别系统
+
+opencv调用摄像头实时获取图像信息
+
+insightFace集成了，ratinaFace用于人脸检测和关键点检测，ArcFace进行embedding用于人脸识别
+    先用ratinaFace对摄像头拍到的图像实时进行人脸检测，并提取关键点，进行仿射变换把图像转换成标准形式，然后把图像给到ArcFace进行embedding来检索数据库匹配已录入的人脸（未见过的人脸输出“未录入”），然后把目标框和人名输出原图像
+
+要有一个SQL数据库用于存储已录入的人脸图像和emdedding向量
+要支持用户动态录入人脸到数据库
+
+numpy计算cos相似度来检索数据库实现人脸匹配
+
+gradio做可视化界面，一个摄像头人脸识别界面，一个人脸录入界面
