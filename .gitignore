@@ -1,3 +1,8 @@
+# 忽略数据库文件
+*.db
+*.sqlite
+*.sqlite3
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
