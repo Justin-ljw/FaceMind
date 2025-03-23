@@ -1,5 +1,6 @@
 import cv2
 import sqlite3
+import os
 from insightface.app import FaceAnalysis
 from camera.video_capture import get_video
 
@@ -7,16 +8,38 @@ from camera.video_capture import get_video
     人脸录入：把摄像头捕捉到的人脸，通过InsightFace提取特征向量，并存入数据库
 '''
 
+def create_database(database_path: str=None):
+    
+    # 连接到指定路径的SQLite数据库（如果本来没有这个数据库文件，则会自动创建）
+    connection = sqlite3.connect(database_path)
+    cursor = connection.cursor()
+    
+    # 创建faces表，存储人脸图像、姓名和特征向量
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS faces (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        image BLOB NOT NULL,
+        name TEXT NOT NULL,
+        encoding BLOB NOT NULL
+    )
+    ''')
+        
+    connection.commit()
+    connection.close()
+
+
 # 把人脸特征向量和名字添加到数据库
-def add_face_to_database(name, encoding, image, connection: sqlite3.Connection):
+def add_face_to_database(name, encoding, image, database_path: str=None):
+    connection = sqlite3.connect(database_path)
     cursor = connection.cursor()
     
     cursor.execute("INSERT INTO faces (image, name, encoding) VALUES (?, ?, ?)", (image, name, encoding.tobytes()))
     connection.commit()
+    connection.close()
 
     
 # 处理检测到的人脸
-def process_faces(name: str, frame, faces, connection: sqlite3.Connection):
+def process_faces(name: str, frame, faces, database_path: str=None):
     for face in faces:
         # 提取人脸特征向量
         embedding = face.embedding
@@ -35,27 +58,26 @@ def process_faces(name: str, frame, faces, connection: sqlite3.Connection):
         
         # 显示检测到的人脸
         cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
-        cv2.imshow('Enroll Face', frame)
-                
-        # 等待用户点击退出
-        while True:
-            if (cv2.waitKey(1) & 0xFF) == ord('q'):
-                break
         
         # 将人脸特征向量、名字和人脸图像添加到数据库
-        add_face_to_database(name, embedding, face_image_bytes, connection)
+        add_face_to_database(name, embedding, face_image_bytes, database_path)
     
     # 关闭窗口
     cv2.destroyAllWindows()
     
     # 判断是否检测到人脸
-    have_face = faces is not None
+    have_face = len(faces) > 0
     
     return frame, have_face
     
 
 # 通过摄像头录入人脸
-def enroll_from_camera(app: FaceAnalysis, name: str, connection: sqlite3.Connection):
+def enroll_from_camera(app: FaceAnalysis, name: str, database_path: str=None):
+    assert database_path is not None, 'Error: 请指定数据库文件路径！'
+    
+    # 检查数据库文件是否存在，如果不存在则初始化数据库
+    if not os.path.exists(database_path):
+        create_database(database_path)
     
     # 初始化连续检测到人脸的帧数计数器
     frame_count_have_face = 0
@@ -83,11 +105,17 @@ def enroll_from_camera(app: FaceAnalysis, name: str, connection: sqlite3.Connect
             break
     
     # 处理检测到的所有人脸，并返回处理后的视频帧和是否检测到人脸
-    return process_faces(name, frame, faces, connection)
+    return process_faces(name, frame, faces, database_path)
     
 
 # 通过上传图片录入人脸
-def enroll_from_image(app: FaceAnalysis, name: str, image_path: str, connection: sqlite3.Connection):
+def enroll_from_image(app: FaceAnalysis, name: str, image_path: str, database_path: str=None):
+    assert database_path is not None, 'Error: 请指定数据库文件路径！'
+    
+    # 检查数据库文件是否存在，如果不存在则初始化数据库
+    if not os.path.exists(database_path):
+        create_database(database_path)
+    
     # 读取图像
     frame = cv2.imread(image_path)
     
@@ -95,5 +123,5 @@ def enroll_from_image(app: FaceAnalysis, name: str, image_path: str, connection:
     faces = app.get(frame)
     
     # 处理检测到的所有人脸，并返回处理后的视频帧和是否检测到人脸
-    return process_faces(name, frame, faces, connection)   
+    return process_faces(name, frame, faces, database_path)   
     

@@ -40,7 +40,9 @@ if __name__ == "__main__":
     for frame in get_video():
         cv2.imshow('Video', frame)
         
+        # 按Esc键退出
         # 和 0xFF 按位与是为了确保只保留最低 8 位，即ASCII码，以保证不同操作系统的兼容性
-        if (cv2.waitKey(1) & 0xFF) == ord('q'):
+        if (cv2.waitKey(1) & 0xFF) == 27:
             break
+        
     cv2.destroyAllWindows()
