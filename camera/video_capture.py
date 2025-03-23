@@ -1,7 +1,7 @@
 import cv2
 
 '''
-    通过OpenCV调用摄像头来实时获取视频帧
+    通过OpenCV调用本地摄像头来实时获取视频帧
 '''
 
 def get_video():

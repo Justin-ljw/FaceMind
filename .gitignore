@@ -3,6 +3,9 @@
 *.sqlite
 *.sqlite3
 
+# 忽略gradio的临时文件
+gradio_temp/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

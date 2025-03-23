@@ -2,52 +2,73 @@ import gradio as gr
 import cv2
 import os
 from insightface.app import FaceAnalysis
-from camera.video_capture import get_video
 from face_process.face_recognize import process_frame
-from SQL.faces_enroll import enroll_from_camera, enroll_from_image
+from SQL.faces_enroll import enroll_from_image
+from SQL.database_operate import check_name_unique
+
+'''
+    前端Web界面：
+    基于Gradio实现一个前端Web界面，
+    在此界面，用户可以拍摄/上传视频进行人脸识别、拍摄/上传照片进行人脸录入
+'''
 
 # 人脸识别界面：调用摄像头实现人脸识别，当gradio通过摄像头拍到的视频流发生变化时，会回调这个函数
-def recognize_faces_from_camera(frame, 
-                                app: FaceAnalysis,  
-                                known_face_encodings,
-                                known_face_names, 
-                                threshold: float=0.5):
-    # 处理视频帧，进行人脸识别
-    frame = process_frame(app, 
-                          frame, 
-                          known_face_encodings, 
-                          known_face_names, 
-                          threshold)
+def recognize_faces_from_video(input_path, 
+                  app, 
+                  known_face_encodings, 
+                  known_face_names, 
+                  threshold=0.5):
+    print(input_path)
     
-    return frame
-        
-    #     # 显示处理后的视频帧
-    #     cv2.imshow('Video', frame)
-        
-    #     # 和 0xFF 按位与是为了确保只保留最低 8 位，即ASCII码，以保证不同操作系统的兼容性
-    #     if (cv2.waitKey(1) & 0xFF) == ord('q'):
-    #         break
-        
-    # cv2.destroyAllWindows()
-
-
-# 摄像头录入界面：通过摄像头录入人脸
-def enroll_faces_from_camera(app:FaceAnalysis, name: str, database_path: str=None):
-    try:
-        frame, have_face = enroll_from_camera(app, name, database_path)
-        
-        if not have_face:
-            return None, "录入失败：未检测到人脸"
-        
-        # 将图像从 BGR 转换为 RGB再返回
-        return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), f"人脸 {name} 已成功录入数据库！"
+    # 通过输入视频文件的路径，获取输出视频文件的路径
+    directory = os.path.dirname(input_path)  # 获取文件所在的目录
+    output_filename = 'processed.webm'  # 新的文件名
+    output_path = os.path.join(directory, output_filename)  # 新的文件路径
     
-    except Exception as e:
-        return None, f"录入失败：{str(e)}"
+    # 打开视频文件
+    cap = cv2.VideoCapture(input_path)
+    
+    # 获取视频的帧率、宽度和高度
+    fps = int(cap.get(cv2.CAP_PROP_FPS))  # 帧率
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  # 宽度
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))  # 高度
+    fourcc = cv2.VideoWriter_fourcc(*'VP80')  # webm视频文件编码格式
+    out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))  # 创建输出视频
+    
+    while cap.isOpened():
+        ret, frame = cap.read()  # 读取一帧
+        
+        # 读完视频则退出
+        if not ret:
+            break
+        
+        # 处理当前帧
+        processed_frame = process_frame(app, 
+                                        frame, 
+                                        known_face_encodings, 
+                                        known_face_names, 
+                                        threshold)
+        
+        # 将处理后的帧写入输出视频
+        out.write(processed_frame)
+        
+    # 释放资源
+    cap.release()
+    out.release()
+    
+    return output_path
 
 
-# 上传图片录入界面：通过上传照片录入人脸
-def enroll_faces_from_image(app: FaceAnalysis, name: str, image, database_path: str=None):
+# 通过拍摄或上传照片录入人脸
+def enroll_faces_from_image(app: FaceAnalysis, 
+                            name: str, 
+                            image, 
+                            database_path: str):
+    if name == "":
+        return None, "录入失败：姓名不能为空"
+    if check_name_unique(name, database_path):
+        return None, "录入失败：该姓名已在数据库中"
+    
     try:
         image_path = 'temp_image.jpg'
         
@@ -61,7 +82,7 @@ def enroll_faces_from_image(app: FaceAnalysis, name: str, image, database_path: 
         os.remove(image_path)
         
         if not have_face:
-            return None, "录入失败：未检测到人脸"
+            return frame, "录入失败：未检测到人脸"
         
         # 将图像从 BGR 转换为 RGB再返回
         return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), f"人脸 {name} 已成功录入数据库！"
@@ -71,23 +92,63 @@ def enroll_faces_from_image(app: FaceAnalysis, name: str, image, database_path: 
 
 
 # 主界面：人脸识别界面
-def web_interface(app: FaceAnalysis, known_face_encodings, known_face_names, database_path: str=None, threshold: float=0.5):
+def web_interface(app: FaceAnalysis, 
+                  known_face_encodings, 
+                  known_face_names, 
+                  database_path: str, 
+                  threshold: float=0.5):
+    
     with gr.Blocks() as demo:
-        gr.Markdown("# FaceMind 实时人脸识别系统")
+        gr.Markdown("# FaceMind 人脸识别系统")
         
         # 实时人脸识别标签页
-        with gr.Tab("实时人脸识别"):
-            gr.Markdown("## 调用摄像头实现人脸识别")
+        with gr.Tab("人脸识别"):
             
-            video_feed = gr.Video(sources="webcam", streaming=True)
-            # 当视频流变化时调用 recognize_faces_from_camera 函数
-            video_feed.change(fn=lambda frame: recognize_faces_from_camera(frame, 
-                                                                           app, 
-                                                                           known_face_encodings, 
-                                                                           known_face_names, 
-                                                                           threshold), 
-                              inputs=video_feed, 
-                              outputs=video_feed)
+            with gr.Tab("拍摄视频进行人脸识别"):
+                gr.Markdown("## 拍摄视频进行人脸识别")
+                
+                with gr.Row():
+                    with gr.Column():
+                        # 负责采集的摄像头
+                        video_feed = gr.Video(label='拍摄到的视频', sources="webcam", streaming=True)
+                        
+                    with gr.Column():
+                        # 显示处理后的视频
+                        processed_video = gr.Video(label='处理后的视频')
+                
+                # 当拍摄完视频时调用recognize_faces_from_video函数，将处理后的视频输出到processed_video
+                video_feed.change(fn=lambda video_path: recognize_faces_from_video(video_path, 
+                                                                            app, 
+                                                                            known_face_encodings, 
+                                                                            known_face_names, 
+                                                                            threshold), 
+                                inputs=video_feed, 
+                                outputs=processed_video)
+                
+            
+            with gr.Tab("上传视频进行人脸识别"):
+                gr.Markdown("## 上传视频进行人脸识别")
+                
+                with gr.Row():
+                    with gr.Column():
+                        # 获取上传的视频
+                        video_feed = gr.Video(label='上传的视频', sources="upload", streaming=True)
+                        
+                    with gr.Column():
+                        # 显示处理后的视频
+                        processed_video = gr.Video(label='处理后的视频')
+                        
+                # 开始录入按钮
+                start = gr.Button("开始人脸识别")
+                
+                # 点击录入按钮时，调用 enroll_faces_from_camera 函数
+                start.click(fn=lambda video_path: recognize_faces_from_video(video_path, 
+                                                                        app, 
+                                                                        known_face_encodings, 
+                                                                        known_face_names, 
+                                                                        threshold), 
+                            inputs=video_feed, 
+                            outputs=processed_video)
             
             
         # 人脸录入标签页
@@ -99,6 +160,7 @@ def web_interface(app: FaceAnalysis, known_face_encodings, known_face_names, dat
                     with gr.Column():
                         gr.Markdown("### 通过摄像头录入人脸")
                         
+                        image_input = gr.Image(sources="webcam", streaming=False)
                         name_input = gr.Textbox(label="请输入姓名")
                         
                         # 开始录入按钮
@@ -111,8 +173,8 @@ def web_interface(app: FaceAnalysis, known_face_encodings, known_face_names, dat
                         output_text = gr.Textbox()
                 
                 # 点击录入按钮时，调用 enroll_faces_from_camera 函数
-                checkin.click(lambda name: enroll_faces_from_camera(app, name, database_path) if name else "姓名不能为空", 
-                                                inputs=name_input,
+                checkin.click(lambda image, name: enroll_faces_from_image(app, name, image, database_path), 
+                                                inputs=[image_input, name_input],
                                                 outputs=[output_image, output_text])
                 
                 # 刷新当前界面的按钮，以实现继续录入
@@ -140,7 +202,7 @@ def web_interface(app: FaceAnalysis, known_face_encodings, known_face_names, dat
                         output_text = gr.Textbox()
 
                 # 点击录入按钮时，调用 enroll_faces_from_image 函数
-                checkin.click(lambda image, name: enroll_faces_from_image(app, name, image, database_path) if name else "姓名不能为空", 
+                checkin.click(lambda image, name: enroll_faces_from_image(app, name, image, database_path), 
                                                 inputs=[image_input, name_input], 
                                                 outputs=[output_image, output_text])
                 

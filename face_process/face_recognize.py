@@ -26,9 +26,6 @@ def recognize_faces(app: FaceAnalysis,
     # 使用检测模型检测人脸
     faces = app.get(frame)
     
-    # 打印 known_face_encodings 的形状
-    print(f"known_face_encodings shape: {np.array(known_face_encodings).shape}")
-    
     # 和数据库已知人脸进行匹配，返回人脸框和姓名
     face_names = []
     for face in faces:
