@@ -103,6 +103,7 @@ def web_interface(app: FaceAnalysis,
         
         # 实时人脸识别标签页
         with gr.Tab("人脸识别"):
+            gr.Markdown("## 选择人脸识别方式")
             
             with gr.Tab("拍摄视频进行人脸识别"):
                 gr.Markdown("## 拍摄视频进行人脸识别")
