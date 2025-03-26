@@ -6,6 +6,10 @@
 # 忽略gradio的临时文件
 gradio_temp/
 
+#忽略默认下载的模型文件
+.insightface/models/buffalo_l
+.insightface/models/buffalo_l.zip
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

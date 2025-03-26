@@ -34,3 +34,12 @@ Gradio：用于创建前端界面。
 使用Gradio创建一个简单的Web应用，提供用户界面。
 
 前端界面允许用户查看实时视频流、录入新的人脸、查看识别结果等。
+
+## 快速开始
+克隆仓库
+
+git clone https://github.com/Justin-ljw/FaceMind.git
+
+安装依赖
+
+pip install -r requirements.txt

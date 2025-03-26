@@ -4,7 +4,7 @@ import os
 from insightface.app import FaceAnalysis
 from face_process.face_recognize import process_frame
 from SQL.faces_enroll import enroll_from_image
-from SQL.database_operate import check_name_unique
+from SQL.database_operate import load_known_faces
 
 '''
     前端Web界面：
@@ -12,12 +12,19 @@ from SQL.database_operate import check_name_unique
     在此界面，用户可以拍摄/上传视频进行人脸识别、拍摄/上传照片进行人脸录入
 '''
 
+
 # 人脸识别界面：调用摄像头实现人脸识别，当gradio通过摄像头拍到的视频流发生变化时，会回调这个函数
 def recognize_faces_from_video(input_path, 
-                  app, 
-                  known_face_encodings, 
-                  known_face_names, 
-                  threshold=0.5):
+                               app,
+                               database_path: str,
+                               threshold=0.6):
+    # 如果输入地址为None的话，即输入Video的操作是关闭视频，直接输出None，让输出Video的视频也关闭
+    if input_path is None:
+        return None
+
+    # 从指定的数据库文件中加载已知人脸的特征向量和姓名
+    known_face_encodings, known_face_names = load_known_faces(database_path)
+
     print(input_path)
     
     # 通过输入视频文件的路径，获取输出视频文件的路径
@@ -66,8 +73,6 @@ def enroll_faces_from_image(app: FaceAnalysis,
                             database_path: str):
     if name == "":
         return None, "录入失败：姓名不能为空"
-    if check_name_unique(name, database_path):
-        return None, "录入失败：该姓名已在数据库中"
     
     try:
         image_path = 'temp_image.jpg'
@@ -92,11 +97,9 @@ def enroll_faces_from_image(app: FaceAnalysis,
 
 
 # 主界面：人脸识别界面
-def web_interface(app: FaceAnalysis, 
-                  known_face_encodings, 
-                  known_face_names, 
+def web_interface(app: FaceAnalysis,
                   database_path: str, 
-                  threshold: float=0.5):
+                  threshold: float=0.6):
     
     with gr.Blocks() as demo:
         gr.Markdown("# FaceMind 人脸识别系统")
@@ -105,7 +108,7 @@ def web_interface(app: FaceAnalysis,
         with gr.Tab("人脸识别"):
             gr.Markdown("## 选择人脸识别方式")
             
-            with gr.Tab("拍摄视频进行人脸识别"):
+            with gr.Tab("拍摄视频"):
                 gr.Markdown("## 拍摄视频进行人脸识别")
                 
                 with gr.Row():
@@ -120,14 +123,19 @@ def web_interface(app: FaceAnalysis,
                 # 当拍摄完视频时调用recognize_faces_from_video函数，将处理后的视频输出到processed_video
                 video_feed.change(fn=lambda video_path: recognize_faces_from_video(video_path, 
                                                                             app, 
-                                                                            known_face_encodings, 
-                                                                            known_face_names, 
+                                                                            database_path,
                                                                             threshold), 
                                 inputs=video_feed, 
                                 outputs=processed_video)
-                
-            
-            with gr.Tab("上传视频进行人脸识别"):
+
+                # 刷新当前界面的按钮，以实现再次识别
+                def refresh_recognize():
+                    return gr.update(value=None), gr.update(value=None)
+
+                gr.Button("再次识别").click(refresh_recognize,
+                                            outputs=[video_feed, processed_video])
+
+            with gr.Tab("上传视频"):
                 gr.Markdown("## 上传视频进行人脸识别")
                 
                 with gr.Row():
@@ -145,56 +153,53 @@ def web_interface(app: FaceAnalysis,
                 # 点击录入按钮时，调用 enroll_faces_from_camera 函数
                 start.click(fn=lambda video_path: recognize_faces_from_video(video_path, 
                                                                         app, 
-                                                                        known_face_encodings, 
-                                                                        known_face_names, 
+                                                                        database_path,
                                                                         threshold), 
                             inputs=video_feed, 
                             outputs=processed_video)
-            
+
+                # 刷新当前界面的按钮，以实现再次识别
+                gr.Button("再次识别").click(refresh_recognize,
+                                            outputs=[video_feed, processed_video])
+
             
         # 人脸录入标签页
         with gr.Tab("人脸录入"):
             gr.Markdown("## 选择人脸录入方式")
             
-            with gr.Tab("摄像头录入"):
+            with gr.Tab("拍摄照片"):
                 with gr.Row():
                     with gr.Column():
-                        gr.Markdown("### 通过摄像头录入人脸")
+                        gr.Markdown("### 通过拍摄照片录入人脸")
                         
                         image_input = gr.Image(sources="webcam", streaming=False)
                         name_input = gr.Textbox(label="请输入姓名")
-                        
-                        # 开始录入按钮
-                        checkin = gr.Button("开始录入")
                         
                     with gr.Column():
                         gr.Markdown("### 录入结果")
                         
                         output_image = gr.Image()
                         output_text = gr.Textbox()
-                
-                # 点击录入按钮时，调用 enroll_faces_from_camera 函数
-                checkin.click(lambda image, name: enroll_faces_from_image(app, name, image, database_path), 
+
+                # 开始录入按钮：点击按钮时，调用 enroll_faces_from_camera 函数
+                gr.Button("开始录入").click(lambda image, name: enroll_faces_from_image(app, name, image, database_path),
                                                 inputs=[image_input, name_input],
                                                 outputs=[output_image, output_text])
                 
                 # 刷新当前界面的按钮，以实现继续录入
-                def refresh_camera_input():
-                    return gr.update(value=""), gr.update(value=None), gr.update(value="")
+                def refresh_enroll():
+                    return gr.update(value=None), gr.update(value=""), gr.update(value=None), gr.update(value="")
 
-                gr.Button("继续录入").click(refresh_camera_input, outputs=[name_input, output_image, output_text])
-                
-            
-            with gr.Tab("上传照片录入"):
+                gr.Button("继续录入").click(refresh_enroll, 
+                                        outputs=[image_input, name_input, output_image, output_text])
+
+            with gr.Tab("上传照片"):
                 with gr.Row():
                     with gr.Column():
                         gr.Markdown("### 通过上传照片录入人脸")
                         
                         image_input = gr.Image(sources="upload", type="numpy")
                         name_input = gr.Textbox(label="请输入姓名")
-                        
-                        # 上传并录入按钮
-                        checkin = gr.Button("上传并录入")
                 
                     with gr.Column():
                         gr.Markdown("### 录入结果")
@@ -202,16 +207,13 @@ def web_interface(app: FaceAnalysis,
                         output_image = gr.Image()
                         output_text = gr.Textbox()
 
-                # 点击录入按钮时，调用 enroll_faces_from_image 函数
-                checkin.click(lambda image, name: enroll_faces_from_image(app, name, image, database_path), 
+                # 上传并录入按钮：点击按钮时，调用 enroll_faces_from_image 函数
+                gr.Button("上传并录入").click(lambda image, name: enroll_faces_from_image(app, name, image, database_path),
                                                 inputs=[image_input, name_input], 
                                                 outputs=[output_image, output_text])
-                
-                # 刷新当前界面的按钮，以实现继续录入
-                def refresh_image_input():
-                    return gr.update(value=None), gr.update(value=""), gr.update(value=None), gr.update(value="")
 
-                gr.Button("继续录入").click(refresh_image_input, outputs=[image_input, name_input, output_image, output_text])
-            
+                # 刷新当前界面的按钮
+                gr.Button("继续录入").click(refresh_enroll, 
+                                        outputs=[image_input, name_input, output_image, output_text])
 
     return demo

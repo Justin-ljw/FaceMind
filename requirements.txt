@@ -1,0 +1,8 @@
+insightface==0.7.3
+opencv-python==4.11.0.86
+numpy==2.2.4
+torch==2.6.0
+gradio==5.22.0
+pillow==11.1.0
+onnx==1.17.0
+onnxruntime==1.21.0
