@@ -22,7 +22,7 @@ def cosine_similarity(known_faces, current_face, device):
         known_faces_norm = torch.linalg.norm(known_faces, dim=1, keepdims=True)
         current_face_norm = torch.linalg.norm(current_face, dim=0, keepdims=True)
 
-        cos = torch.matmul(known_faces, current_face) / (known_faces_norm * current_face_norm)
+        cos = torch.matmul(known_faces, current_face) / (known_faces_norm * current_face_norm).reshape(-1)
 
         return cos.cpu().numpy()
 
@@ -50,7 +50,7 @@ def recognize_faces(app: FaceAnalysis,
         name = "Unknown"
 
         # 记录所有已知人脸和当前人脸相似度最大的最大值
-        max_similarity_overall = -1
+        max_similarity_overall = 0
 
         # 计算数据库中所有的已知人脸有多少个batch
         num_batches = len(known_face_encodings) // batch_size + (1 if len(known_face_encodings) % batch_size != 0 else 0)
@@ -74,9 +74,9 @@ def recognize_faces(app: FaceAnalysis,
                 if max_similarity_batch > threshold:
                     index_in_batch = np.argmax(similarities)
                     index = start_idx + index_in_batch
-                    name = known_face_names[index]
 
-            print(name)
+                    print(index)
+                    name = known_face_names[index]
 
         face_names.append((face.bbox, name))
 
@@ -89,6 +89,10 @@ def process_frame(app: FaceAnalysis,
                   known_face_encodings,
                   known_face_names, 
                   threshold: float=0.6):
+
+    print(f"embedding len:{known_face_encodings.shape[0]}")
+    print(f"name len:{len(known_face_names)}")
+    print(known_face_names)
     
     # 识别人脸，返回人脸框和姓名
     face_names = recognize_faces(app, 

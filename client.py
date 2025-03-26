@@ -31,7 +31,7 @@ if __name__ == "__main__":
         3.LOCAL_RECOGNIZE (本地识别模式)：可进行本地摄像头实时人脸识别
         （LOCAL_ENROLL 和 LOCAL_RECOGNIZE 按 Esc 键退出）
     '''
-    mode: User_Mode = User_Mode.LOCAL_ENROLL
+    mode: User_Mode = User_Mode.WEB
     
     '''
         RetinaFace 和 ArcFace 模型的路径：
