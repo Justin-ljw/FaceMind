@@ -6,7 +6,7 @@ from camera.video_capture import get_video
 from face_process.init_InsightFace import Init_model
 from face_process.face_recognize import process_frame
 from SQL.database_operate import create_database
-from SQL.faces_enroll import enroll_from_camera_local
+from face_process.faces_enroll import enroll_from_camera_local
 from SQL.database_operate import load_known_faces
 from UI.front_end import web_interface
 
@@ -85,7 +85,7 @@ def recognize_faces_by_local(app: FaceAnalysis,
                               known_face_names, 
                               threshold)
         
-        cv2.imshow('Recoginzation', frame)
+        cv2.imshow('FaceMind: Recognize (Esc To Exit)', frame)
         
         # 按下Esc键退出，27 是 Esc 键的 ASCII 码
         # 和 0xFF 按位与是为了确保只保留最低 8 位，即ASCII码，以保证不同操作系统的兼容性

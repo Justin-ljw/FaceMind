@@ -3,7 +3,7 @@ import cv2
 import os
 from insightface.app import FaceAnalysis
 from face_process.face_recognize import process_frame
-from SQL.faces_enroll import enroll_from_image
+from face_process.faces_enroll import enroll_from_image
 from SQL.database_operate import load_known_faces
 
 '''

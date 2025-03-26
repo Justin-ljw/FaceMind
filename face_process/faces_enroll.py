@@ -32,14 +32,14 @@ def enroll_from_camera_local(app: FaceAnalysis,
             x1, y1, x2, y2 = [int(v) for v in face.bbox]
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
         
-        cv2.imshow('Video', frame)
+        cv2.imshow('FaceMind: CapturedFace (Esc To Exit)', frame)
         
         # 按下Esc键退出
         if (cv2.waitKey(1) & 0xFF) == 27:
             break
         
-        # 如果连续检测到10个视频帧都有人脸，则停止拍摄
-        if frame_count_have_face >= 10:
+        # 如果连续检测到20个视频帧都有人脸，则停止拍摄
+        if frame_count_have_face >= 20:
             break
     
     '''
@@ -61,7 +61,7 @@ def enroll_from_camera_local(app: FaceAnalysis,
     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
     
     # 显示检测到的人脸
-    cv2.imshow('Get_Face', frame)
+    cv2.imshow('FaceMind: Enroll (Esc To Exit)', frame)
     # 等待用户按下任意键
     cv2.waitKey(0)
     cv2.destroyAllWindows()
