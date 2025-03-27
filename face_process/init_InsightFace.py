@@ -1,3 +1,6 @@
+# @Author        : Justin Lee
+# @Time          : 2025-3-27
+
 import os
 import insightface.model_zoo as model_zoo
 from insightface.app import FaceAnalysis
@@ -9,7 +12,8 @@ from insightface.app import FaceAnalysis
 
 
 # 初始化InsightFace模型
-def Init_model(retinaface_model_path: str=None, arcface_model_path: str=None) -> FaceAnalysis:
+def Init_model(retinaface_model_path: str=None,
+               arcface_model_path: str=None) -> FaceAnalysis:
     # 设置模型的存放位置
     current_file_path = os.path.abspath(__file__)  # 获取当前文件的绝对路径
     parent_directory = os.path.dirname(os.path.dirname(current_file_path))  # 获取向上两级目录（到达项目根目录 FaceMind）

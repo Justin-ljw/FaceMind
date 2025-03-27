@@ -1,3 +1,6 @@
+# @Author        : Justin Lee
+# @Time          : 2025-3-27
+
 import cv2
 import os
 from insightface.app import FaceAnalysis
@@ -19,10 +22,10 @@ from UI.front_end import web_interface
 # 主函数：通过web界面调用完整的FaceMind系统
 def main(mode: User_Mode=User_Mode.WEB, 
          retinaface_model_path: str=None, 
-         arcface_model_path: str=None, 
+         arcface_model_path: str=None,
          database_path: str='databases/known_faces.db', 
          gradio_temp_dir: str='gradio_temp/',
-         threshold: float=0.6):
+         threshold: float=0.5):
     
     # 将相对路径转换为绝对路径（这样就可以通过使用相对路径而兼容不同环境）
     if retinaface_model_path:
@@ -72,7 +75,7 @@ def main(mode: User_Mode=User_Mode.WEB,
 # 通过OpenCV调用摄像头进行人脸识别（不使用网页UI界面）
 def recognize_faces_by_local(app: FaceAnalysis,
                              database_path: str,
-                             threshold: float=0.6):
+                             threshold: float=0.5):
     # 从指定的数据库文件中加载已知人脸的特征向量和姓名
     known_face_encodings, known_face_names = load_known_faces(database_path)
 

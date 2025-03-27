@@ -1,3 +1,6 @@
+# @Author        : Justin Lee
+# @Time          : 2025-3-27
+
 import cv2
 import numpy as np
 import torch
@@ -19,10 +22,10 @@ def cosine_similarity(known_faces, current_face, device):
         known_faces = torch.tensor(known_faces, dtype=torch.float32).to(device)
         current_face = torch.tensor(current_face, dtype=torch.float32).to(device)
 
-        known_faces_norm = torch.linalg.norm(known_faces, dim=1, keepdims=True)
+        known_faces_norm = torch.linalg.norm(known_faces, dim=1, keepdims=True).reshape(-1)
         current_face_norm = torch.linalg.norm(current_face, dim=0, keepdims=True)
 
-        cos = torch.matmul(known_faces, current_face) / (known_faces_norm * current_face_norm).reshape(-1)
+        cos = torch.matmul(known_faces, current_face) / (known_faces_norm * current_face_norm)
 
         return cos.cpu().numpy()
 
@@ -32,7 +35,7 @@ def recognize_faces(app: FaceAnalysis,
                     frame,
                     known_face_encodings,
                     known_face_names,
-                    threshold: float = 0.6,
+                    threshold: float = 0.5,
                     batch_size: int = 1024) -> list:
     # 使用检测模型检测人脸
     faces = app.get(frame)
@@ -74,8 +77,6 @@ def recognize_faces(app: FaceAnalysis,
                 if max_similarity_batch > threshold:
                     index_in_batch = np.argmax(similarities)
                     index = start_idx + index_in_batch
-
-                    print(index)
                     name = known_face_names[index]
 
         face_names.append((face.bbox, name))
@@ -88,11 +89,7 @@ def process_frame(app: FaceAnalysis,
                   frame, 
                   known_face_encodings,
                   known_face_names, 
-                  threshold: float=0.6):
-
-    print(f"embedding len:{known_face_encodings.shape[0]}")
-    print(f"name len:{len(known_face_names)}")
-    print(known_face_names)
+                  threshold: float=0.5):
     
     # 识别人脸，返回人脸框和姓名
     face_names = recognize_faces(app, 

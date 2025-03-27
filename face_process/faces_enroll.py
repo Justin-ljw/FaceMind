@@ -1,3 +1,6 @@
+# @Author        : Justin Lee
+# @Time          : 2025-3-27
+
 import cv2
 from insightface.app import FaceAnalysis
 from SQL.database_operate import add_face_to_database

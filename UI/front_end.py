@@ -1,3 +1,6 @@
+# @Author        : Justin Lee
+# @Time          : 2025-3-27
+
 import gradio as gr
 import cv2
 import os
@@ -17,15 +20,13 @@ from SQL.database_operate import load_known_faces
 def recognize_faces_from_video(input_path, 
                                app,
                                database_path: str,
-                               threshold=0.6):
+                               threshold=0.5):
     # 如果输入地址为None的话，即输入Video的操作是关闭视频，直接输出None，让输出Video的视频也关闭
     if input_path is None:
-        return None
+        return None, None, None
 
     # 从指定的数据库文件中加载已知人脸的特征向量和姓名
     known_face_encodings, known_face_names = load_known_faces(database_path)
-
-    print(input_path)
     
     # 通过输入视频文件的路径，获取输出视频文件的路径
     directory = os.path.dirname(input_path)  # 获取文件所在的目录
@@ -62,8 +63,8 @@ def recognize_faces_from_video(input_path,
     # 释放资源
     cap.release()
     out.release()
-    
-    return output_path
+
+    return output_path, input_path, output_path
 
 
 # 通过拍摄或上传照片录入人脸
@@ -99,7 +100,7 @@ def enroll_faces_from_image(app: FaceAnalysis,
 # 主界面：人脸识别界面
 def web_interface(app: FaceAnalysis,
                   database_path: str, 
-                  threshold: float=0.6):
+                  threshold: float=0.5):
     
     with gr.Blocks() as demo:
         gr.Markdown("# FaceMind 人脸识别系统")
@@ -115,10 +116,12 @@ def web_interface(app: FaceAnalysis,
                     with gr.Column():
                         # 负责采集的摄像头
                         video_feed = gr.Video(label='拍摄到的视频', sources="webcam", streaming=True)
-                        
+                        input_path_text = gr.Textbox(label="原始视频的文件路径")
+
                     with gr.Column():
                         # 显示处理后的视频
                         processed_video = gr.Video(label='处理后的视频')
+                        output_path_text = gr.Textbox(label="处理后视频的文件路径")
                 
                 # 当拍摄完视频时调用recognize_faces_from_video函数，将处理后的视频输出到processed_video
                 video_feed.change(fn=lambda video_path: recognize_faces_from_video(video_path, 
@@ -126,14 +129,14 @@ def web_interface(app: FaceAnalysis,
                                                                             database_path,
                                                                             threshold), 
                                 inputs=video_feed, 
-                                outputs=processed_video)
+                                outputs=[processed_video, input_path_text, output_path_text])
 
                 # 刷新当前界面的按钮，以实现再次识别
                 def refresh_recognize():
-                    return gr.update(value=None), gr.update(value=None)
+                    return gr.update(value=None), gr.update(value=None), gr.update(value=None), gr.update(value=None)
 
                 gr.Button("再次识别").click(refresh_recognize,
-                                            outputs=[video_feed, processed_video])
+                                            outputs=[video_feed, processed_video, input_path_text, output_path_text])
 
             with gr.Tab("上传视频"):
                 gr.Markdown("## 上传视频进行人脸识别")
@@ -142,10 +145,12 @@ def web_interface(app: FaceAnalysis,
                     with gr.Column():
                         # 获取上传的视频
                         video_feed = gr.Video(label='上传的视频', sources="upload", streaming=True)
+                        input_path_text = gr.Textbox(label="原始视频的文件路径")
                         
                     with gr.Column():
                         # 显示处理后的视频
                         processed_video = gr.Video(label='处理后的视频')
+                        output_path_text = gr.Textbox(label="处理后视频的文件路径")
                         
                 # 开始录入按钮
                 start = gr.Button("开始人脸识别")
@@ -156,11 +161,11 @@ def web_interface(app: FaceAnalysis,
                                                                         database_path,
                                                                         threshold), 
                             inputs=video_feed, 
-                            outputs=processed_video)
+                            outputs=[processed_video, input_path_text, output_path_text])
 
                 # 刷新当前界面的按钮，以实现再次识别
                 gr.Button("再次识别").click(refresh_recognize,
-                                            outputs=[video_feed, processed_video])
+                                            outputs=[video_feed, processed_video, input_path_text, output_path_text])
 
             
         # 人脸录入标签页
@@ -182,13 +187,16 @@ def web_interface(app: FaceAnalysis,
                         output_text = gr.Textbox()
 
                 # 开始录入按钮：点击按钮时，调用 enroll_faces_from_camera 函数
-                gr.Button("开始录入").click(lambda image, name: enroll_faces_from_image(app, name, image, database_path),
+                gr.Button("开始录入").click(lambda image, name: enroll_faces_from_image(app,
+                                                                                       name.strip(),
+                                                                                       image,
+                                                                                       database_path),
                                                 inputs=[image_input, name_input],
                                                 outputs=[output_image, output_text])
                 
                 # 刷新当前界面的按钮，以实现继续录入
                 def refresh_enroll():
-                    return gr.update(value=None), gr.update(value=""), gr.update(value=None), gr.update(value="")
+                    return gr.update(value=None), gr.update(value=None), gr.update(value=None), gr.update(value=None)
 
                 gr.Button("继续录入").click(refresh_enroll, 
                                         outputs=[image_input, name_input, output_image, output_text])
@@ -208,7 +216,10 @@ def web_interface(app: FaceAnalysis,
                         output_text = gr.Textbox()
 
                 # 上传并录入按钮：点击按钮时，调用 enroll_faces_from_image 函数
-                gr.Button("上传并录入").click(lambda image, name: enroll_faces_from_image(app, name, image, database_path),
+                gr.Button("上传并录入").click(lambda image, name: enroll_faces_from_image(app,
+                                                                                         name.strip(),
+                                                                                         image,
+                                                                                         database_path),
                                                 inputs=[image_input, name_input], 
                                                 outputs=[output_image, output_text])
 

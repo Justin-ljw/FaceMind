@@ -1,3 +1,6 @@
+# @Author        : Justin Lee
+# @Time          : 2025-3-27
+
 from merge.facemind import main
 from merge.mode import User_Mode
 
@@ -11,10 +14,10 @@ from merge.mode import User_Mode
 
 def facemind_client(mode: User_Mode=User_Mode.WEB, 
                     retinaface_model_path: str=None, 
-                    arcface_model_path: str=None, 
+                    arcface_model_path: str=None,
                     database_path: str='databases/known_faces.db', 
                     gradio_temp_dir: str='gradio_temp/',
-                    threshold: float=0.6):
+                    threshold: float=0.5):
     main(mode, 
          retinaface_model_path, 
          arcface_model_path, 
@@ -35,7 +38,9 @@ if __name__ == "__main__":
     
     '''
         RetinaFace 和 ArcFace 模型的路径：
-        可使用自己的 RetinaFace 和 ArcFace 模型，
+        可使用自己的 RetinaFace 和 ArcFace 模型
+        （注意：不同ArcFace模型对数据的处理不同，如果已经用一个 ArcFace 模型构建了一个已知人脸数据库，
+        那切换 ArcFace 模型的话可能无法匹配，要重新构建已知人脸数据库）
         默认都为None，即使用默认的 RetinaFace 和 ArcFace 模型
     '''
     retinaface_model_path: str = None
@@ -58,7 +63,7 @@ if __name__ == "__main__":
         用于判断要识别的人脸是否已录入，
         threshold数值越大，对匹配的相识度要求越高，即越容易认为不匹配
     '''
-    threshold: float = 0.6
+    threshold: float = 0.5
     
     facemind_client(mode, 
                     retinaface_model_path, 

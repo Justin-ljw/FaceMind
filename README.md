@@ -43,3 +43,10 @@ git clone https://github.com/Justin-ljw/FaceMind.git
 安装依赖
 
 pip install -r requirements.txt
+
+## Reference
+RetinaFace 论文地址：https://arxiv.org/abs/1905.00641
+
+ArcFace 论文地址：https://arxiv.org/abs/1801.07698
+
+所用的ArcFace模型文件 FaceMind/.insightface/models/arcface_resnet100_wf4m.pt 来自 https://huggingface.co/minchul/cvlface_arcface_ir101_webface4m
