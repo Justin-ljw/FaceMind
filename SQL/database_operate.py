@@ -19,6 +19,7 @@ def create_database(database_path: str=None):
     # 创建faces表，存储人脸图像、姓名和特征向量
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS faces (
+        image BLOB NOT NULL,
         name TEXT NOT NULL,
         encoding BLOB NOT NULL
     )
@@ -29,11 +30,12 @@ def create_database(database_path: str=None):
 
 
 # 把人脸特征向量和名字添加到数据库
-def add_face_to_database(name, encoding, database_path: str=None):
+def add_face_to_database(image, name, encoding, database_path: str=None):
     connection = sqlite3.connect(database_path)
     cursor = connection.cursor()
     
-    cursor.execute("INSERT INTO faces (name, encoding) VALUES (?, ?)", (name, encoding.tobytes()))
+    cursor.execute("INSERT INTO faces (image, name, encoding) VALUES (?, ?, ?)",
+                   (image, name, encoding.tobytes()))
     connection.commit()
     connection.close()
     

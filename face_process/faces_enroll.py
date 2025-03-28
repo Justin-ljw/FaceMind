@@ -3,6 +3,7 @@
 
 import cv2
 from insightface.app import FaceAnalysis
+from insightface.utils import face_align
 from SQL.database_operate import add_face_to_database
 from camera.video_capture import get_video
 
@@ -52,9 +53,13 @@ def enroll_from_camera_local(app: FaceAnalysis,
     
     # 录入只支持一个图像一个人脸
     name = input('请输入您的姓名：')
-    
+
+    # 获取对齐后的人脸图像
+    face_image = face_align.norm_crop(img=frame, landmark=faces[0].kps)
+
     # 录入检测到的人脸
-    add_face_to_database(name,
+    add_face_to_database(face_image,
+                         name,
                          faces[0].embedding,
                          database_path)
 
@@ -89,8 +94,12 @@ def enroll_from_image(app: FaceAnalysis,
     have_faces = len(faces) > 0
     # 如果检测到了人脸就录入
     if have_faces:
+        # 获取对齐后的人脸图像
+        face_image = face_align.norm_crop(img=frame, landmark=faces[0].kps)
+
         # 录入检测到的人脸
-        add_face_to_database(name,
+        add_face_to_database(face_image,
+                             name,
                              faces[0].embedding,
                              database_path)
 
