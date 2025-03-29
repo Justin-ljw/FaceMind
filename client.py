@@ -14,7 +14,7 @@ from merge.mode import User_Mode
 
 def facemind_client(mode: User_Mode=User_Mode.WEB, 
                     retinaface_model_path: str=None, 
-                    arcface_model_path: str=None,
+                    arcface_model_path: str='.insightface/models/ArcFace_iResNet50_CASIA_FaceV5.onnx',
                     database_path: str='databases/known_faces.db', 
                     gradio_temp_dir: str='gradio_temp/',
                     threshold: float=0.5):

@@ -79,6 +79,8 @@ def recognize_faces(app: FaceAnalysis,
                     index = start_idx + index_in_batch
                     name = known_face_names[index]
 
+        print(f"cos_similarity: {max_similarity_overall}")
+
         face_names.append((face.bbox, name))
 
     return face_names
@@ -97,6 +99,10 @@ def process_frame(app: FaceAnalysis,
                                  known_face_encodings, 
                                  known_face_names, 
                                  threshold)
+    
+    # 如果没有检测到人脸，直接返回，并标记未检测到
+    if len(face_names) <= 0:
+        return frame, False
 
     # 因为 OpenCV 不能绘制中文，所以要将 OpenCV 图像转换为 PIL 图像，绘制完再转回OpenCV图像
     pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
@@ -115,4 +121,4 @@ def process_frame(app: FaceAnalysis,
     # 将 PIL 图像转换回 OpenCV 图像
     frame = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
     
-    return frame
+    return frame, True

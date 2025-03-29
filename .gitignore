@@ -1,3 +1,6 @@
+# 忽略.idea文件夹
+.idea/
+
 # 忽略数据库文件
 *.db
 *.sqlite
@@ -7,8 +10,15 @@
 gradio_temp/
 
 #忽略默认下载的模型文件
-.insightface/models/buffalo_l
-.insightface/models/buffalo_l.zip
+.insightface/models/
+
+# 忽略用于训练的数据集文件
+arcface_train/origin_dataset/*
+arcface_train/processed_dataset/*
+
+# 但不忽略这个文件夹本身，即保留空的文件夹，方便查找路径
+!arcface_train/origin_dataset/
+!arcface_train/processed_dataset/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
