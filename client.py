@@ -41,10 +41,16 @@ if __name__ == "__main__":
         可使用自己的 RetinaFace 和 ArcFace 模型
         （注意：不同ArcFace模型对数据的处理不同，如果已经用一个 ArcFace 模型构建了一个已知人脸数据库，
         那切换 ArcFace 模型的话可能无法匹配，要重新构建已知人脸数据库）
-        默认都为None，即使用默认的 RetinaFace 和 ArcFace 模型
+        默认都为None，即使用InsightFace官方默认的 RetinaFace 和 ArcFace 模型
     '''
     retinaface_model_path: str = None
+
     arcface_model_path: str = None
+    '''
+        ArcFace 模型也可以使用作者微调过的模型，用下面这个路径会自动从modelscope下载
+        但是，因为模型基座能力的问题，InsightFace 官方默认的是 ArcFace 模型效果是最好的
+    '''
+    # arcface_model_path: str = '.insightface/models/ArcFace_iResNet50_CASIA_FaceV5.onnx'
     
     '''
         数据库文件路径：
