@@ -27,38 +27,49 @@
 - [Reference](#reference)
 - [联系我们](#联系我们)
 
+---
+
 ## 技术和库
 
 - **OpenCV**: 用于摄像头实时拍摄和图像处理。
 - **InsightFace ( RetinaFace + ArcFace )**: 用于人脸检测、对齐和识别。
 - **SQLite**: 用于存储人脸数据和用户信息的数据库。
-- **Gradio**: 用于创建前端界面。
+- **Gradio**: 用于创建交互友好的Web前端界面。
+
+---
 
 ## 实现功能
-本系统提供两种模式，分别为 Web 模式和 Local 模式  
+本系统提供两种模式，分别为 **Web 模式** 和 **Local 模式**，以满足不同使用场景的需求。
 
 **1.Web 模式**：  
-由 Gradio 实现，提供网页 `拍摄/上传视频进行人脸识别`、`拍摄/上传照片进行人脸识别`和`拍摄/上传照片进行人脸录入`功能
+由 Gradio 实现，提供以下功能：
+- `拍摄/上传视频进行人脸识别`
+- `拍摄/上传照片进行人脸识别`
+- `拍摄/上传照片进行人脸录入`
 
 **_示例_**：  
-_Web 界面首页_
-![Web_home.jpg](README_images%2FWeb_home.jpg)
+- _Web 界面首页_
+  ![Web_home.jpg](README_images%2FWeb_home.jpg)
 
-_Web 模式人脸录入_
-![Web_enroll.jpg](README_images%2FWeb_enroll.jpg)
+- _Web 模式人脸录入_
+  ![Web_enroll.jpg](README_images%2FWeb_enroll.jpg)
 
-_Web 模式人脸识别_
-![Web_recognize.jpg](README_images%2FWeb_recognize.jpg)
+- _Web 模式人脸识别_
+  ![Web_recognize.jpg](README_images%2FWeb_recognize.jpg)
 
 **2.Local 模式**：  
-由OpenCV实现，提供本地`实时拍摄进行人脸识别`和`实时拍摄进行人脸识别`功能
+由OpenCV实现，提供以下功能：
+- `实时拍摄进行人脸识别`
+- `实时拍摄进行人脸识别`
 
 _**示例**_：  
-_Local 模式实时人脸录入_
-![Local_enroll.jpg](README_images%2FLocal_enroll.jpg)
+- _Local 模式实时人脸录入_
+  ![Local_enroll.jpg](README_images%2FLocal_enroll.jpg)
 
-_Local 模式实时人脸识别（支持持续识别）_
-![Local_recognize.jpg](README_images%2FLocal_recognize.jpg)
+- _Local 模式实时人脸识别（支持持续识别）_
+  ![Local_recognize.jpg](README_images%2FLocal_recognize.jpg)
+
+---
 
 ## 工作流程
 
@@ -78,14 +89,16 @@ _Local 模式实时人脸识别（支持持续识别）_
 *这里使用 InsightFace 库来实现对实时视频流的人脸识别。 InsightFace 集成了 RetinaFace 和 ArcFace ， RetinaFace 用于实现人脸检测和关键点提取，对图像的人脸区域进行仿射变换对齐和裁剪后给到 ArcFace ，ArcFace 对人脸图像进行 embedding ；并用当前这个人脸 embedding 和数据库中所有的已知人脸 embedding 计算 cos 相似度，匹配最相似的已录入人脸（未见过的人脸输出 "Unknown" ），最后把目标框和人名输出回原始图像。*
 
 **3. 数据库支持**  
-    使用 SQLite 数据库存储已知人脸的编码和姓名信息。
+    SQLite 用于存储已知人脸的编码和对应姓名信息，以便进行人脸匹配时快速查询。
 
 
 **4. 前端界面**  
-    使用 Gradio 创建一个方便用户交互的Web界面。
+    Gradio 创建了一个简单易用的Web界面，用户无需安装额外软件即可上传图片或视频进行测试。
+
+---
 
 ## 项目结构
-```
+```text
 FaceMind/
 ├── LICENSE                        # 许可证文件
 ├── README.md                      # 项目说明文档
@@ -127,24 +140,36 @@ FaceMind/
     └── models/                    # 存放下载的各类模型文件（系统默认下载的模型会以该路径为根目录）
 ```
 
+---
+
 
 ## 模型训练
-本项目使用自主清洗并数据增强的亚洲人脸数据集 [CASIA_FaceV5](https://modelscope.cn/datasets/JustinLeee/Cleaned_Augmented_CASIA_FaceV5) 对以 `iResNet50` 为基座的 [ArcFace](https://modelscope.cn/models/JustinLeee/FaceMind_ArcFace_iResNet50_CASIA_FaceV5) 进行了微调。  
+本项目在 `CASIA_FaceV5` 数据集上对 `iResNet50` 为主体的 [`ArcFace`](https://modelscope.cn/models/JustinLeee/FaceMind_ArcFace_iResNet50_CASIA_FaceV5) 模型进行微调：
 
 训练的代码和预训练模型来自GitHub大佬：https://github.com/bubbliiiing/arcface-pytorch
+ 
+- 训练超参数：
+  - epoch: 100（最终选用第 50 次的模型）
+  - learning_rate: 1e-4
+  - lr_decay_type: cos
+  - batch_size: 224
+  - loss_function: ArcFaceLoss (margin=0.5, scale=64)
+  - optimizer: Adam (momentum=0.9, weight_decay=0)
 
-**训练记录如下**：  
-epoch = 100, learning_rate = 1e-4, lr_decay_type = cos, warm_up = False, batch_size = 224, loss_function = ArcFaceLoss, margin = 0.5, scale = 64, optimizer = Adam, momentum = 0.9, weight_decay = 0  
+- 数据集：
+  - **自主**清洗并增强的亚洲人脸数据集 [CASIA_FaceV5](https://modelscope.cn/datasets/JustinLeee/Cleaned_Augmented_CASIA_FaceV5)
+  - 数据集中有500个个体，每个个体约 5 张原始人脸，经 12 种数据增强后达到 65 张，整体数据规模至少可覆盖大多数常见场景。
 
-dataset有500个人，每个人5张照片，每张照片会有12种数据增强的操作（即每个人65张照片）
 
 ![train_record](README_images/ArcFace_iResNet50_train_loss.jpg)
 
-因为数据集比较小的缘故，整个训练过程其实是过拟合了的，所以最终选用的模型是 epoch = 50 的模型（图中红色箭头的位置）。  
-且因预训练模型的能力不太强，所以实际效果没有 InsightFace 官方默认的 ArcFace 模型好，最终系统默认采用的还是 InsightFace 官方默认的 ArcFace 模型。
+*因为数据集比较小的缘故，部分实验存在轻微过拟合，所以最终选用的模型是 epoch 为 50 的模型（图中红色箭头的位置）。*  
+*且因预训练的基础模型的能力不太强，所以实际效果没有 InsightFace 官方默认的 ArcFace 模型好，最终系统默认采用的还是 InsightFace 官方默认的 ArcFace 模型。*
+
+---
 
 ## 快速开始
-本项目基于 python 3.11 进行开发
+本项目基于 `python 3.11` 进行开发
 
 1.**克隆仓库**： 
 ```bash
@@ -159,26 +184,35 @@ dataset有500个人，每个人5张照片，每张照片会有12种数据增强�
   # client.py 脚本为系统入口，用户可以自主选择运行模式和所用模型（内有详细注释）
   python client.py
 ```
+默认情况下，系统会在首次启动时自动下载并加载 InsightFace 默认的 RetinaFace 和 ArcFace 模型。若需要使用自行微调的 ArcFace 模型，可以在运行时进行对应的选择或修改配置。
+
+---
 
 ## License
-- 本项目签署了 `Apache 2.0` 许可证，详情请参阅 [LCENSE](LICENSE)  
-- 本项目只可用于个人学习研究，不可用于商用
+- 本项目使用 `Apache 2.0` 许可证，详情请参阅 [LCENSE](LICENSE)  
+- 本项目仅限个人或教学用途，禁止商用。
+
+---
 
 ## Contribution
-本仓库代码由个人独立完成
+本项目由个人独立完成，若有建议或发现问题，欢迎通过 Issue 或 Pull Request 与我们沟通。
+
+---
 
 ## Reference
-- _**RetinaFace**_ 论文地址：https://arxiv.org/abs/1905.00641
-- _**ArcFace**_ 论文地址：https://arxiv.org/abs/1801.07698
-- _**InsightFace**_ 官方仓库地址：https://github.com/deepinsight/insightface
-- _**CASIA_FaceV5**_ 原始数据集地址：http://biometrics.idealtest.org/dbDetailForUser.do#/datasetDetail/9
-- ***训练的代码和预训练模型***的仓库地址：https://github.com/bubbliiiing/arcface-pytorch
-- ***自主***清洗并数据增强的 CASIA_FaceV5 数据集地址：https://modelscope.cn/datasets/JustinLeee/Cleaned_Augmented_CASIA_FaceV5
-- ***自主***微调的 ArcFace 模型地址：https://modelscope.cn/models/JustinLeee/FaceMind_ArcFace_iResNet50_CASIA_FaceV5
+- [_**RetinaFace**_ 论文](https://arxiv.org/abs/1905.00641)
+- [_**ArcFace**_ 论文](https://arxiv.org/abs/1801.07698)
+- [_**InsightFace**_ 官方仓库](https://github.com/deepinsight/insightface)
+- [_**CASIA_FaceV5**_ 原始数据集](http://biometrics.idealtest.org/dbDetailForUser.do#/datasetDetail/9)
+- [***训练的代码和预训练模型***的 GitHub 仓库](https://github.com/bubbliiiing/arcface-pytorch)
+- [***自主***清洗并数据增强的 CASIA_FaceV5 数据集](https://modelscope.cn/datasets/JustinLeee/Cleaned_Augmented_CASIA_FaceV5)
+- [***自主***微调的 ArcFace 模型](https://modelscope.cn/models/JustinLeee/FaceMind_ArcFace_iResNet50_CASIA_FaceV5)
+
+---
 
 ## 联系我们
-- ***本项目***地址：https://github.com/Justin-ljw/FaceMind  
+- ***本 GitHub 项目***：https://github.com/Justin-ljw/FaceMind  
 - _**e-mail**_：ljw15999715853@qq.com
-- _**Hugging Face**_：https://huggingface.co/JustinLeee
-- _**ModelScope**_：https://modelscope.cn/profile/JustinLeee
-- _**CSDN**_：https://blog.csdn.net/justin_ljw
+- _**Hugging Face**_：[JustinLeee](https://huggingface.co/JustinLeee)
+- _**ModelScope**_：[JustinLeee](https://modelscope.cn/profile/JustinLeee)
+- _**CSDN**_：[justin_ljw](https://blog.csdn.net/justin_ljw)
