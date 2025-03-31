@@ -1,14 +1,19 @@
-# FaceMind
-FaceMind：基于OpenCV + RetinaFace + ArcFace的深度学习实时人脸识别系统
+<h1 align="center">🤩FaceMind：基于OpenCV + RetinaFace + ArcFace的深度学习实时人脸识别系统</h1>
 
-![Face_Recognition](https://img.shields.io/badge/project-实时人脸识别系统-blue)
-![area](https://img.shields.io/badge/area-Deeplearning-red)
-![InsightFace](https://img.shields.io/badge/package-InsightFacce-yellow)
-![OpenCV](https://img.shields.io/badge/package-OpenCV-yellow)
-![RetinaFace](https://img.shields.io/badge/model-RetinaFace-green)
-![ArcFace](https://img.shields.io/badge/model-ArcFace-green)
-![license](https://img.shields.io/badge/license-Apache_2.0-brightgreen)
-![Version](https://img.shields.io/badge/version-0.0.0-orange)
+<p align="center">
+  <a href="https://github.com/Justin-ljw/FaceMind">
+    <img src="https://img.shields.io/badge/project-实时人脸识别系统-blue" alt="Face_Recognition"/>
+  </a>
+  <img src="https://img.shields.io/badge/area-Deeplearning-red" alt="area"/>
+  <img src="https://img.shields.io/badge/package-InsightFacce-yellow" alt="InsightFace"/>
+  <img src="https://img.shields.io/badge/package-OpenCV-yellow" alt="OpenCV"/>
+  <img src="https://img.shields.io/badge/package-Gradio-yellow" alt="OpenCV"/>
+  <img src="https://img.shields.io/badge/model-RetinaFace-green" alt="RetinaFace"/>
+  <img src="https://img.shields.io/badge/model-ArcFace-green" alt="ArcFace"/>
+  <img src="https://img.shields.io/badge/license-Apache_2.0-brightgreen" alt="license"/>
+  <img src="https://img.shields.io/badge/version-0.0.0-orange" alt="version"/>
+</p>
+
 
 ## 目录
 - [技术和库](#技术和库)
