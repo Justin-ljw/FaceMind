@@ -5,12 +5,23 @@
     <img src="https://img.shields.io/badge/project-实时人脸识别系统-blue" alt="Face_Recognition"/>
   </a>
   <img src="https://img.shields.io/badge/area-Deeplearning-red" alt="area"/>
-  <img src="https://img.shields.io/badge/package-InsightFacce-yellow" alt="InsightFace"/>
-  <img src="https://img.shields.io/badge/package-OpenCV-yellow" alt="OpenCV"/>
-  <img src="https://img.shields.io/badge/package-Gradio-yellow" alt="OpenCV"/>
-  <img src="https://img.shields.io/badge/model-RetinaFace-green" alt="RetinaFace"/>
-  <img src="https://img.shields.io/badge/model-ArcFace-green" alt="ArcFace"/>
+  <a href="https://github.com/deepinsight/insightface">
+    <img src="https://img.shields.io/badge/package-InsightFacce-yellow" alt="InsightFace"/>
+  </a>
+  <a href="https://github.com/opencv/opencv">
+    <img src="https://img.shields.io/badge/package-OpenCV-yellow" alt="OpenCV"/>
+  </a>
+  <a href="https://github.com/gradio-app/gradio">
+    <img src="https://img.shields.io/badge/package-Gradio-yellow" alt="OpenCV"/>
+  </a>
+  <a href="https://arxiv.org/abs/1905.00641">
+    <img src="https://img.shields.io/badge/model-RetinaFace-green" alt="RetinaFace"/>
+  </a>
+  <a href="https://arxiv.org/abs/1801.07698">
+    <img src="https://img.shields.io/badge/model-ArcFace-green" alt="ArcFace"/>
+  </a>
   <img src="https://img.shields.io/badge/license-Apache_2.0-brightgreen" alt="license"/>
+  <img src="https://img.shields.io/badge/python-3.11+-pink" alt="version"/>
   <img src="https://img.shields.io/badge/version-0.0.0-orange" alt="version"/>
 </p>
 
