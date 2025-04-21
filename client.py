@@ -29,7 +29,7 @@ def facemind_client(mode: User_Mode=User_Mode.WEB,
 if __name__ == "__main__":
     '''
         用户模式：
-        1.WEB (Web界面模式)：可进行视频人脸识别和照片人脸录入
+        1.WEB (Web界面模式)：可进行视频人脸识别和照片人脸录入（注意：请勿使用VPN启动Web模式）
         2.LOCAL_ENROLL (本地录入模式)：可进行本地摄像头的人脸录入
         3.LOCAL_RECOGNIZE (本地识别模式)：可进行本地摄像头实时人脸识别
         （LOCAL_ENROLL 和 LOCAL_RECOGNIZE 按 Esc 键退出）

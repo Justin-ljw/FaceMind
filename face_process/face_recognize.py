@@ -48,6 +48,7 @@ def recognize_faces(app: FaceAnalysis,
 
     # 和数据库已知人脸进行匹配，返回人脸框和姓名
     face_names = []
+    max_similarity_overall = 0
     for face in faces:
         # 未录入的人脸对应的姓名为 Unknown
         name = "Unknown"
@@ -83,7 +84,7 @@ def recognize_faces(app: FaceAnalysis,
 
         face_names.append((face.bbox, name))
 
-    return face_names
+    return face_names, max_similarity_overall
 
 
 # 把人脸识别的结果画在视频帧上
@@ -94,7 +95,7 @@ def process_frame(app: FaceAnalysis,
                   threshold: float=0.5):
     
     # 识别人脸，返回人脸框和姓名
-    face_names = recognize_faces(app, 
+    face_names, similarity = recognize_faces(app, 
                                  frame, 
                                  known_face_encodings, 
                                  known_face_names, 
@@ -102,7 +103,7 @@ def process_frame(app: FaceAnalysis,
     
     # 如果没有检测到人脸，直接返回，并标记未检测到
     if len(face_names) <= 0:
-        return frame, False
+        return frame, False, 0
 
     # 因为 OpenCV 不能绘制中文，所以要将 OpenCV 图像转换为 PIL 图像，绘制完再转回OpenCV图像
     pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
@@ -121,4 +122,4 @@ def process_frame(app: FaceAnalysis,
     # 将 PIL 图像转换回 OpenCV 图像
     frame = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
     
-    return frame, True
+    return frame, True, similarity

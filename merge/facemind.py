@@ -82,7 +82,7 @@ def recognize_faces_by_local(app: FaceAnalysis,
     # 通过OpenCV调用本地摄像头实时获取视频帧
     for frame in get_video():
         # 处理视频帧，进行人脸识别
-        frame, _ = process_frame(app, 
+        frame, _ , _= process_frame(app, 
                               frame, 
                               known_face_encodings,
                               known_face_names, 

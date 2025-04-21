@@ -21,7 +21,7 @@
     <img src="https://img.shields.io/badge/model-ArcFace-green" alt="ArcFace"/>
   </a>
   <img src="https://img.shields.io/badge/license-Apache_2.0-brightgreen" alt="license"/>
-  <img src="https://img.shields.io/badge/python-3.11+-pink" alt="version"/>
+  <img src="https://img.shields.io/badge/python-3.11+-pink" alt="python"/>
   <img src="https://img.shields.io/badge/version-0.0.0-orange" alt="version"/>
 </p>
 
@@ -53,6 +53,7 @@
 本系统提供两种模式，分别为 **Web 模式** 和 **Local 模式**，以满足不同使用场景的需求。
 
 **1.Web 模式**：  
+*注意：请勿使用VPN启动Web模式*  
 由 Gradio 实现，提供以下功能：
 - `拍摄/上传视频进行人脸识别`
 - `拍摄/上传照片进行人脸识别`
@@ -60,7 +61,8 @@
 
 **_示例_**：  
 - _Web 界面首页_
-  ![Web_home.jpg](README_images%2FWeb_home.jpg)
+  ![Web_recognize_start](README_images%2FWeb_recognize_start.jpg)  
+  ![Web_enroll_start](README_images%2FWeb_enroll_start.jpg)
 
 - _Web 模式人脸录入_
   ![Web_enroll.jpg](README_images%2FWeb_enroll.jpg)

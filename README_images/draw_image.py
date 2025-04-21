@@ -35,8 +35,8 @@ def draw_face(input_path: str,
     
 
 if __name__ == "__main__":
-    input_path = './README_images/sample_origin.jpg'  # 输入图片路径
-    output_path = './README_images/sample_retinaface.jpg'  # 输出图片路径
+    input_path = './README_images/sample_cut.jpg'  # 输入图片路径
+    output_path = './README_images/sample_kps.jpg'  # 输出图片路径
     
     draw_face(input_path, output_path)
     print(f"绘制后的图片已保存到：{output_path}")

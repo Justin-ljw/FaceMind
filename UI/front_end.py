@@ -58,7 +58,7 @@ def recognize_faces_from_video(input_path,
             
             try:
                 # 处理当前帧
-                processed_frame, _ = process_frame(app, 
+                processed_frame, _ , _= process_frame(app, 
                                                 frame, 
                                                 known_face_encodings, 
                                                 known_face_names, 
@@ -98,7 +98,7 @@ def recognize_faces_from_image(image,
         image_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
         # 调用 process_frame 处理图像
-        processed_frame, have_faces = process_frame(app, 
+        processed_frame, have_faces, similarity = process_frame(app, 
                                                     image_bgr, 
                                                     known_face_encodings, 
                                                     known_face_names, 
@@ -107,9 +107,9 @@ def recognize_faces_from_image(image,
         # 将处理后的图像从 BGR 转换回 RGB
         processed_image = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
         
-        result_text = "人脸识别成功！"
-        if not have_faces:
-            result_text = "未检测到人脸！"
+        result_text = "未检测到人脸！"
+        if have_faces:
+            result_text = f"人脸识别成功！COS相似度为：{similarity:.6f}"
 
         return processed_image, result_text
 
